@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baking for Grandma</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+
+        /* Cozy Theme CSS */
+        body {
+            background-color: #fdf2f8; /* Soft pink background */
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #5d4037;
+        }
+
+        #game-container {
+            background-color: white;
+            width: 400px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(236, 64, 122, 0.15);
+            text-align: center;
+            border: 4px solid #f8bbd0;
+        }
+
+        h1 {
+            font-family: 'Fredoka One', cursive;
+            color: #ec407a;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-family: 'Fredoka One', cursive;
+            color: #880e4f;
+            font-size: 1.5rem;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .emoji-icon {
+            font-size: 4rem;
+            margin: 10px 0;
+            display: block;
+        }
+
+        .btn {
+            background-color: #ec407a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-family: 'Fredoka One', cursive;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background-color: #d81b60;
+            transform: scale(1.05);
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-card {
+            background: #fff0f6;
+            border: 2px solid #f8bbd0;
+            border-radius: 10px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option-card:hover {
+            background: #fce4ec;
+            transform: translateY(-3px);
+            border-color: #ec407a;
+        }
+
+        .slider-container {
+            margin: 30px 0;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: #ec407a;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-family: 'Fredoka One', cursive;
+            color: #ec407a;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <div id="screen-intro">
+        <span class="emoji-icon">👵🎂</span>
+        <h1>Baking for Grandma</h1>
+        <p>Grandma is coming over for tea! Make her a delicious cake. She will rate it from 1 to 10.</p>
+        <button class="btn" onclick="goToStep('flavor')">Start Baking</button>
+    </div>
+
+    <div id="screen-flavor" class="hidden">
+        <h2>Pick a Base</h2>
+        <p>What kind of batter should we make?</p>
+        <div class="option-grid">
+            <div class="option-card" onclick="selectFlavor('Vanilla', '🧁')">
+                <div style="font-size:2rem">🧁</div>
+                <div>Vanilla</div>
+            </div>
+            <div class="option-card" onclick="selectFlavor('Chocolate', '🍫')">
+                <div style="font-size:2rem">🍫</div>
+                <div>Choco</div>
+            </div>
+            <div class="option-card" onclick="selectFlavor('Lemon', '🍋')">
+                <div style="font-size:2rem">🍋</div>
+                <div>Lemon</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-mixin" class="hidden">
+        <h2>Add a Mix-in</h2>
+        <p>What should we add to the <span id="display-flavor"></span> batter?</p>
+        <div class="option-grid">
+            <div class="option-card" onclick="selectMixin('Berries', '🍓')">
+                <div style="font-size:2rem">🍓</div>
+                <div>Berries</div>
+            </div>
+            <div class="option-card" onclick="selectMixin('Nuts', '🥜')">
+                <div style="font-size:2rem">🥜</div>
+                <div>Nuts</div>
+            </div>
+            <div class="option-card" onclick="selectMixin('Love', '❤️')">
+                <div style="font-size:2rem">❤️</div>
+                <div>Just Love</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-oven" class="hidden">
+        <h2>Into the Oven!</h2>
+        <span class="emoji-icon">🔥⏲️</span>
+        <p>How long should we bake it? <br><small>(Don't burn it!)</small></p>
+        
+        <div class="slider-container">
+            <input type="range" id="ovenSlider" min="10" max="90" value="20" oninput="updateTimeDisplay(this.value)">
+            <p>Time: <span id="time-display" style="font-weight:bold; color:#ec407a;">20</span> minutes</p>
+        </div>
+
+        <button class="btn" onclick="finishBaking()">Take Out</button>
+    </div>
+
+    <div id="screen-result" class="hidden">
+        <span class="emoji-icon">👵</span>
+        <h2>Grandma's Verdict</h2>
+        <p id="result-description"></p>
+        
+        <div class="score-display">
+            <span id="score-val">?</span>/10
+        </div>
+        <p id="grandma-quote" style="font-style: italic; color: #880e4f; margin-top:15px;"></p>
+        
+        <button class="btn" onclick="resetGame()">Bake Another</button>
+    </div>
+
+</div>
+
+<script>
+    // Game State
+    let cakeState = {
+        flavor: '',
+        flavorIcon: '',
+        mixin: '',
+        mixinIcon: '',
+        time: 20
+    };
+
+    // Navigation
+    function goToStep(step) {
+        // Hide all screens
+        document.querySelectorAll('#game-container > div').forEach(div => div.classList.add('hidden'));
+        
+        // Show specific screen
+        if(step === 'flavor') document.getElementById('screen-flavor').classList.remove('hidden');
+        if(step === 'mixin') {
+            document.getElementById('display-flavor').innerText = cakeState.flavor;
+            document.getElementById('screen-mixin').classList.remove('hidden');
+        }
+        if(step === 'oven') document.getElementById('screen-oven').classList.remove('hidden');
+        if(step === 'result') document.getElementById('screen-result').classList.remove('hidden');
+        if(step === 'intro') document.getElementById('screen-intro').classList.remove('hidden');
+    }
+
+    // Actions
+    function selectFlavor(flavor, icon) {
+        cakeState.flavor = flavor;
+        cakeState.flavorIcon = icon;
+        goToStep('mixin');
+    }
+
+    function selectMixin(mixin, icon) {
+        cakeState.mixin = mixin;
+        cakeState.mixinIcon = icon;
+        goToStep('oven');
+    }
+
+    function updateTimeDisplay(val) {
+        document.getElementById('time-display').innerText = val;
+        cakeState.time = parseInt(val);
+    }
+
+    function finishBaking() {
+        calculateScore();
+        goToStep('result');
+    }
+
+    function calculateScore() {
+        // Ideal baking time is between 40 and 50 minutes
+        const time = cakeState.time;
+        let score = 0;
+        let comment = "";
+        let quote = "";
+
+        // Logic for baking time
+        if (time < 30) {
+            score = Math.floor(Math.random() * 3) + 1; // 1 to 3
+            comment = `Oh no! The ${cakeState.flavor} cake is completely raw inside!`;
+            quote = `"Oh dear... did you forget to turn the oven on? It's all goo."`;
+        } else if (time >= 30 && time < 40) {
+            score = Math.floor(Math.random() * 2) + 5; // 5 to 6
+            comment = `It's a little undercooked, but edible.`;
+            quote = `"It's a bit sticky, sweetie, but it tastes nice!"`;
+        } else if (time >= 40 && time <= 50) {
+            score = Math.floor(Math.random() * 2) + 9; // 9 to 10
+            comment = `Perfection! Golden brown and fluffy.`;
+            quote = `"Oh my! This is the best cake I've had in years! You're a natural!"`;
+        } else if (time > 50 && time < 65) {
+            score = Math.floor(Math.random() * 2) + 6; // 6 to 7
+            comment = `It's a little dry, but goes well with tea.`;
+            quote = `"A little crunchy, but I have strong teeth! Thank you, darling."`;
+        } else {
+            score = Math.floor(Math.random() * 2) + 1; // 1 to 2
+            comment = `The cake is burnt to a crisp!`;
+            quote = `"Oh... well... it certainly has a 'smoky' flavor, doesn't it?"`;
+        }
+
+        // Flavor synergy bonus (optional logic to make it fun)
+        // If you picked "Love" as a mixin, minimum score is 4 because Grandma loves love.
+        if (cakeState.mixin === 'Love' && score < 4) {
+            score = 4;
+            quote = `"It's a disaster, but I can taste the love. I'll give you points for heart!"`;
+        }
+
+        // DOM Updates
+        document.getElementById('result-description').innerHTML = 
+            `${cakeState.flavorIcon} ${cakeState.mixinIcon}<br>${comment}`;
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('grandma-quote').innerText = quote;
+    }
+
+    function resetGame() {
+        cakeState = { flavor: '', flavorIcon: '', mixin: '', mixinIcon: '', time: 20 };
+        document.getElementById('ovenSlider').value = 20;
+        document.getElementById('time-display').innerText = "20";
+        goToStep('intro');
+    }
+
+</script>
+
+</body>
+</html>
